@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>最強の扶養チェックツール</title>
+  <style>
+    :root {
+      --main-color: #3a86ff;
+      --accent-color: #ffbe0b;
+      --background: #f0f4f8;
+      --white: #fff;
+      --gray: #555;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', sans-serif;
+      margin: 0;
+      padding: 2em 1em;
+      background: var(--background);
+      color: var(--gray);
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: var(--white);
+      padding: 2em;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--main-color);
+      margin-bottom: 1em;
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 1.2em;
+      display: block;
+    }
+
+    input, select, button {
+      width: 100%;
+      margin-top: 0.4em;
+      padding: 0.9em;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+
+    button {
+      background-color: var(--main-color);
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #265dc1;
+    }
+
+    .result {
+      margin-top: 2em;
+      font-weight: bold;
+      white-space: pre-wrap;
+      background: #f9f9f9;
+      padding: 1.2em;
+      border-radius: 10px;
+      border-left: 5px solid var(--accent-color);
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 1em;
+      }
+
+      .container {
+        padding: 1.5em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>最強の扶養チェックツール</h1>
+
+    <label for="income">年間収入（円）：</label>
+    <input type="number" id="income" placeholder="例：900000">
+
+    <label for="commute">交通費（円）：</label>
+    <input type="number" id="commute" placeholder="例：100000">
+
+    <label for="age">年齢：</label>
+    <input type="number" id="age" placeholder="例：19">
+
+    <label for="isStudent">学生ですか？</label>
+    <select id="isStudent">
+      <option value="yes">はい</option>
+      <option value="no">いいえ</option>
+    </select>
+
+    <button onclick="checkFuyou()">チェックする</button>
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function checkFuyou() {
+      const income = parseInt(document.getElementById('income').value) || 0;
+      const commute = parseInt(document.getElementById('commute').value) || 0;
+      const age = parseInt(document.getElementById('age').value) || 0;
+      const isStudent = document.getElementById('isStudent').value === 'yes';
+      const totalIncome = income + commute;
+      const resultDiv = document.getElementById('result');
+
+      let message = `✅ 入力内容\n・年間収入（交通費含む）：${totalIncome.toLocaleString()} 円\n・年齢：${age}歳\n・学生：${isStudent ? 'はい' : 'いいえ'}\n\n`;
+
+      if (totalIncome <= 1030000) {
+        message += "✅ 税法上も社会保険上も扶養内です。安心して大丈夫！";
+      } else if (totalIncome <= 1300000) {
+        message += "⚠️ 税扶養から外れる可能性あり（103万円超え）。\nただし、130万円以下なので健康保険上の扶養は維持できます。";
+      } else if (isStudent && age <= 22 && totalIncome <= 1300000) {
+        message += "⚠️ 税扶養から外れても、特定扶養控除対象（19〜22歳の学生）として親に税控除あり。";
+      } else {
+        message += "❌ 完全に扶養から外れます（130万円超え）。税金と社会保険の負担が発生します。";
+      }
+
+      if (totalIncome > 1300000) {
+        const shakaihoken = Math.round(totalIncome * 0.15);
+        const parentTax = Math.round((isStudent && age >= 19 && age <= 22 ? 630000 : 380000) * 0.1);
+        message += `\n\n🧾 想定される社会保険料：約 ${shakaihoken.toLocaleString()} 円/年`;
+        message += `\n👪 親の年末調整で増える税額：約 ${parentTax.toLocaleString()} 円`;
+      }
+
+      resultDiv.textContent = message;
+      resultDiv.style.color = "#333";
+    }
+  </script>
+</body>
+</html>
